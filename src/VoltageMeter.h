@@ -26,11 +26,12 @@
 
 #include <cstdint>
 #include <esp_adc_cal.h>
+#include "globals.h"
 
 class VoltageMeter {
   public:
     explicit VoltageMeter(
-      uint8_t batteryPin = 34,
+      uint8_t batteryPin = BATTERY_VOLTAGE_PIN,
       adc1_channel_t channel = ADC1_CHANNEL_6);
     /* Returns the (smoothed) value in Volts. */
     double read();

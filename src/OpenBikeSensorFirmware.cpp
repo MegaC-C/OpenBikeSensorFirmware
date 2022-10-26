@@ -26,6 +26,7 @@
 #include <utils/timeutils.h>
 #include "OpenBikeSensorFirmware.h"
 
+#include "SPI.h"
 #include "SPIFFS.h"
 #include <rom/rtc.h>
 
@@ -42,12 +43,6 @@ const uint8_t LEFT_SENSOR_ID = 1;
 const uint8_t RIGHT_SENSOR_ID = 0;
 
 const uint32_t LONG_BUTTON_PRESS_TIME_MS = 2000;
-
-
-// PINs
-const int PUSHBUTTON_PIN = 2;
-const uint8_t GPS_POWER_PIN = 12;
-const uint8_t BatterieVoltage_PIN = 34;
 
 int confirmedMeasurements = 0;
 int numButtonReleased = 0;
@@ -91,8 +86,6 @@ CircularBuffer<DataSet*, 10> dataBuffer;
 
 FileWriter* writer;
 
-const uint8_t displayAddress = 0x3c;
-
 // Enable dev-mode. Allows to
 // - set wifi config
 // - prints more detailed log messages to serial (WIFI password)
@@ -117,14 +110,14 @@ void setupSensors() {
   sensorManager = new HCSR04SensorManager;
 
   HCSR04SensorInfo sensorManaged1;
-  sensorManaged1.triggerPin = (config.displayConfig & DisplaySwapSensors) ? 25 : 15;
-  sensorManaged1.echoPin = (config.displayConfig & DisplaySwapSensors) ? 26 : 4;
+  sensorManaged1.triggerPin = (config.displayConfig & DisplaySwapSensors) ? TRIG2_PIN : TRIG1_PIN;
+  sensorManaged1.echoPin = (config.displayConfig & DisplaySwapSensors) ? ECHO2_PIN : ECHO1_PIN;
   sensorManaged1.sensorLocation = (char*) "Right"; // TODO
   sensorManager->registerSensor(sensorManaged1, 0);
 
   HCSR04SensorInfo sensorManaged2;
-  sensorManaged2.triggerPin = (config.displayConfig & DisplaySwapSensors) ? 15 : 25;
-  sensorManaged2.echoPin = (config.displayConfig & DisplaySwapSensors) ? 4 : 26;
+  sensorManaged2.triggerPin = (config.displayConfig & DisplaySwapSensors) ? TRIG1_PIN : TRIG2_PIN;
+  sensorManaged2.echoPin = (config.displayConfig & DisplaySwapSensors) ? ECHO1_PIN : ECHO2_PIN;
   sensorManaged2.sensorLocation = (char*) "Left"; // TODO
   sensorManager->registerSensor(sensorManaged2, 1);
 
@@ -195,21 +188,32 @@ static void buttonBluetooth(const DataSet *dataSet, uint16_t measureIndex) {
 
 void setup() {
   Serial.begin(115200);
+  SPI.begin(SCK_SD_PIN, MISO_SD_PIN, MOSI_SD_PIN, CS_SD_PIN);   // init SPI here or SPIFF won't work
   log_i("openbikesensor.org - OBS/%s", OBSVersion);
 
   //##############################################################
-  // Configure button pin as INPUT
+  // Configure PINs
   //##############################################################
 
-  pinMode(PUSHBUTTON_PIN, INPUT);
-  pinMode(BatterieVoltage_PIN, INPUT);
-  pinMode(GPS_POWER_PIN, OUTPUT);
-  digitalWrite(GPS_POWER_PIN,HIGH);
+  pinMode(PUSHBUTTON_PIN, INPUT_PULLDOWN);
+  pinMode(BATTERY_VOLTAGE_PIN, INPUT);
+  
+  if(HAS_GPS_SWITCH){
+    pinMode(GPS_POWER_PIN, OUTPUT);
+    digitalWrite(GPS_POWER_PIN,HIGH);
+  }
+
+  if(HAS_PIN_POWERED_DISPLAY){
+    pinMode(GND_DISPLAY_PIN, OUTPUT);
+    digitalWrite(GND_DISPLAY_PIN, LOW);
+    pinMode(VCC_DISPLAY_PIN, OUTPUT);
+    digitalWrite(VCC_DISPLAY_PIN, HIGH);
+  }
 
   //##############################################################
   // Setup display
   //##############################################################
-  Wire.begin();
+  Wire.begin(SDA_DISPLAY_PIN, SCL_DISPLAY_PIN);
   Wire.beginTransmission(displayAddress);
   byte displayError = Wire.endTransmission();
   if (displayError != 0) {
@@ -245,7 +249,7 @@ void setup() {
   //##############################################################
   int8_t sdCount = 0;
   displayTest->showTextOnGrid(2, displayTest->newLine(), "SD...");
-  while (!SD.begin()) {
+  while (!SD.begin(CS_SD_PIN)) {
     sdCount++;
     displayTest->showTextOnGrid(2,
       displayTest->currentLine(), "SD... error " + String(sdCount));
@@ -255,7 +259,7 @@ void setup() {
     delay(200);
   }
 
-  if (SD.begin()) {
+  if (SD.begin(CS_SD_PIN)) {
     displayTest->showTextOnGrid(2, displayTest->currentLine(), "SD... OK");
   }
   delay(333); // Added for user experience
@@ -306,7 +310,7 @@ void setup() {
   const String trackUniqueIdentifier = ObsUtils::createTrackUuid();
 
 
-  if (SD.begin()) {
+  if (SD.begin(CS_SD_PIN)) {
     writer = new CSVFileWriter;
     writer->setFileName();
     writer->writeHeader(trackUniqueIdentifier);
@@ -569,7 +573,7 @@ bool loadConfig(ObsConfig &cfg) {
     }
   }
 
-  if (SD.begin() && SD.exists("/obs.json")) {
+  if (SD.begin(CS_SD_PIN) && SD.exists("/obs.json")) {
     displayTest->showTextOnGrid(2, displayTest->currentLine(), "Init from SD.");
     log_i("Configuration init from SD.");
     delay(1000);
@@ -585,7 +589,7 @@ bool loadConfig(ObsConfig &cfg) {
     delay(5000);
     isNew = true;
   } else {
-    log_d("No configuration init from SD. SD: %d File: %d", SD.begin(), (SD.begin() && SD.exists("/obs.json")));
+    log_d("No configuration init from SD. SD: %d File: %d", SD.begin(CS_SD_PIN), (SD.begin(CS_SD_PIN) && SD.exists("/obs.json")));
   }
 
   log_i("Load cfg");

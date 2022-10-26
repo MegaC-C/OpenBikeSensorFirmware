@@ -22,7 +22,6 @@
  */
 
 #include "VoltageMeter.h"
-#include "globals.h"
 
 /* Class to encapsulate voltage readings and smoothing thereof.
  * Still the values are not as accurate as expected, and it is not
@@ -84,8 +83,8 @@ bool VoltageMeter::hasReadings() {
 }
 
 double VoltageMeter::read() {
-  return esp_adc_cal_raw_to_voltage(readSmoothed(), &adc_chars)
-    * 3.0 / 2000.0; // voltage divider @ OSB PCB
+  return esp_adc_cal_raw_to_voltage(readSmoothed(), &adc_chars) / 1000.0
+    * (VBAT_R_KOHM + GND_R_KOHM) / GND_R_KOHM; // voltage divider @ OSB PCB
 }
 
 int8_t VoltageMeter::readPercentage() {

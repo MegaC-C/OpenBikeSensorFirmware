@@ -85,7 +85,7 @@ class SSD1306DisplayDevice : public DisplayDevice {
 
   public:
     SSD1306DisplayDevice() : DisplayDevice() {
-      m_display = new SSD1306(0x3c, 21, 22); // ADDRESS, SDA, SCL
+      m_display = new SSD1306(displayAddress, SDA_DISPLAY_PIN, SCL_DISPLAY_PIN); // ADDRESS, SDA, SCL
       m_display->init();
       m_display->setBrightness(255);
       m_display->setTextAlignment(TEXT_ALIGN_LEFT);

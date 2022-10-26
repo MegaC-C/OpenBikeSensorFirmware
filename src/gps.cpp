@@ -271,7 +271,7 @@ bool Gps::setMessageInterval(UBX_MSG msgId, uint8_t seconds, bool waitForAck) {
 bool Gps::setBaud() {
   mSerial.end();
   mSerial.setRxBufferSize(512);
-  mSerial.begin(115200, SERIAL_8N1);
+  mSerial.begin(115200, SERIAL_8N1, TX_NEO6M_PIN, RX_NEO6M_PIN); // RXesp32 = TX_NEO6M_PIN, TXesp32 = RX_NEO6M_PIN
   while(mSerial.read() >= 0) ;
 
   if (checkCommunication()) {

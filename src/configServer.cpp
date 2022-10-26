@@ -700,7 +700,7 @@ static void wifiConectedActions() {
   updateDisplay(displayTest);
   MDNS.begin("obs");
   TimeUtils::setClockByNtp(WiFi.gatewayIP().toString().c_str());
-  if (SD.begin() && WiFiClass::status() == WL_CONNECTED) {
+  if (SD.begin(CS_SD_PIN) && WiFiClass::status() == WL_CONNECTED) {
     AlpData::update(displayTest);
   }
 }

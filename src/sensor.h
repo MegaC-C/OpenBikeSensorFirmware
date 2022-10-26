@@ -59,8 +59,8 @@ extern const uint16_t MAX_SENSOR_VALUE;
 const uint8_t NUMBER_OF_TOF_SENSORS = 2;
 
 struct HCSR04SensorInfo {
-  uint8_t triggerPin = 15;
-  uint8_t echoPin = 4;
+  uint8_t triggerPin = TRIG1_PIN;
+  uint8_t echoPin = ECHO1_PIN;
   uint16_t offset = 0;
   uint16_t rawDistance = 0;
   uint16_t distances[MEDIAN_DISTANCE_MEASURES] = { MAX_SENSOR_VALUE, MAX_SENSOR_VALUE, MAX_SENSOR_VALUE };
