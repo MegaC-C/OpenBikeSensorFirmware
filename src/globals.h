@@ -25,6 +25,7 @@
 #define OBS_GLOBALS_H
 
 #include <Arduino.h>
+#include <esp_adc_cal.h>
 
 // ----- choose your hardware here, uncomment only one -----
 #define OBS_HARDWARE
