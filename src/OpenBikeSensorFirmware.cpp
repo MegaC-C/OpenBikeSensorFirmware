@@ -188,7 +188,7 @@ static void buttonBluetooth(const DataSet *dataSet, uint16_t measureIndex) {
 
 void setup() {
   Serial.begin(115200);
-  SPI.begin(SCK_SD_PIN, MISO_SD_PIN, MOSI_SD_PIN, CS_SD_PIN);   // init SPI here or SPIFF won't work
+  SPI.begin(SCK_SD_PIN, MISO_SD_PIN, MOSI_SD_PIN, CS_SD_PIN);   // init SPI here or SPIFFS won't work
   log_i("openbikesensor.org - OBS/%s", OBSVersion);
 
   //##############################################################
@@ -208,6 +208,7 @@ void setup() {
     digitalWrite(GND_DISPLAY_PIN, LOW);
     pinMode(VCC_DISPLAY_PIN, OUTPUT);
     digitalWrite(VCC_DISPLAY_PIN, HIGH);
+    delay(500);   // necessary to completely power on display before initializing i2c
   }
 
   //##############################################################

@@ -61,9 +61,11 @@ const uint8_t GND_DISPLAY_PIN = -1;     // can drain ~20mA; enough to power the 
                                         // ^this can be used in setup() to increase source/drain to 30-40mA 
 const uint8_t displayAddress = 0x3c;
 
-const double VBAT_R_KOHM = 150.0;       // high side R value (kOhm) of BatVoltage divider on PCB
-const double GND_R_KOHM = 300.0;        // low side R value (kOhm) of BatVoltage divider on PCB
+const adc1_channel_t ADC1_CHANNEL = ADC1_CHANNEL_6; // ADC of GPIO34
+const double VBAT_R_KOHM = 150.0;                   // high side R value (kOhm) of BatVoltage divider on PCB
+const double GND_R_KOHM = 300.0;                    // low side R value (kOhm) of BatVoltage divider on PCB
 #else
+
 #ifdef SIMPLE_OBS_HARDWARE
 const bool HAS_PIN_POWERED_DISPLAY = true;
 const bool HAS_GPS_SWITCH = false;
@@ -93,8 +95,9 @@ const uint8_t GND_DISPLAY_PIN = 27;     // can drain ~20mA; enough to power the 
                                         // ^this can be used in setup() to increase source/drain to 30-40mA 
 const uint8_t displayAddress = 0x3c;
 
-const double VBAT_R_KOHM = 100.0;       // high side R value (kOhm) of BatVoltage divider on PCB
-const double GND_R_KOHM = 100.0;        // low side R value (kOhm) of BatVoltage divider on PCB
+const adc1_channel_t ADC1_CHANNEL = ADC1_CHANNEL_7; // ADC of GPIO35
+const double VBAT_R_KOHM = 100.0;                   // high side R value (kOhm) of BatVoltage divider on PCB
+const double GND_R_KOHM = 100.0;                    // low side R value (kOhm) of BatVoltage divider on PCB
 #endif
 #endif
 // ----- end hardware configutration -----

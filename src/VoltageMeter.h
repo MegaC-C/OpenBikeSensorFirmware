@@ -32,7 +32,7 @@ class VoltageMeter {
   public:
     explicit VoltageMeter(
       uint8_t batteryPin = BATTERY_VOLTAGE_PIN,
-      adc1_channel_t channel = ADC1_CHANNEL_6);
+      adc1_channel_t channel = ADC1_CHANNEL);
     /* Returns the (smoothed) value in Volts. */
     double read();
     int8_t readPercentage();
